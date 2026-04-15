@@ -256,7 +256,30 @@ document.addEventListener('DOMContentLoaded', function() {
         if (player) player.classList.add('show');
 
         if (audio) {
-            audio.volume = 0.5;
+            const intro = document.getElementById('intro-audio');
+            
+            const fadeInAudio = (targetVolume, duration) => {
+                const step = (targetVolume - audio.volume) / (duration / 50);
+                const interval = setInterval(() => {
+                    if (audio.volume < targetVolume) {
+                        audio.volume = Math.min(targetVolume, audio.volume + step);
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 50);
+            };
+
+            if (intro) {
+                intro.volume = 1.0;
+                audio.volume = 0.2; // Aumentado de 0.1 para 0.2 conforme solicitado
+                intro.play().catch(e => console.error('Intro failed:', e));
+                
+                intro.onended = () => {
+                    fadeInAudio(0.5, 2000); // Fade-in de 2 segundos até 0.5
+                };
+            } else {
+                audio.volume = 0.5;
+            }
             audio.play().catch(e => console.error('Audio failed:', e));
         }
     }
@@ -291,6 +314,29 @@ document.addEventListener('DOMContentLoaded', function() {
         playPauseBtn.addEventListener('click', () => {
             const icon = playPauseBtn.querySelector('i');
             if (bgAudio.paused) {
+                const intro = document.getElementById('intro-audio');
+                
+                const fadeInAudio = (targetVolume, duration) => {
+                    const step = (targetVolume - bgAudio.volume) / (duration / 50);
+                    const interval = setInterval(() => {
+                        if (bgAudio.volume < targetVolume) {
+                            bgAudio.volume = Math.min(targetVolume, bgAudio.volume + step);
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 50);
+                };
+
+                if (intro && bgAudio.currentTime === 0) {
+                    intro.currentTime = 0;
+                    intro.volume = 1.0;
+                    bgAudio.volume = 0.2; // Aumentado de 0.1 para 0.2 conforme solicitado
+                    intro.play().catch(e => console.error('Intro failed:', e));
+                    
+                    intro.onended = () => {
+                        fadeInAudio(0.5, 2000);
+                    };
+                }
                 bgAudio.play();
                 icon.className = 'fas fa-pause';
             } else {
